@@ -1,0 +1,16 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    int gal;
+    int mil;
+    cout << "Enter gallon amount: ";
+    cin >> gal;
+    cout << endl;
+    cout << "Enter miles can travel: ";
+    cin >> mil;
+    cout << "miles per gallon = " << (mil/gal);
+    return 0;
+}
