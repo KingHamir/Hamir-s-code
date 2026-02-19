@@ -1,0 +1,38 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+	double Loan_payment, gas, oil, insurance, maintenance, tires;
+
+
+	//add the math at the end
+	cout << "Enter the total loan payment: ";
+
+	cin >> Loan_payment;
+
+	cout << "Enter the monthly payment for gas: ";
+
+	cin >> gas;
+
+	cout << "Enter the total oil payment: ";
+
+	cin >> oil;
+
+	cout << "Enter the monthly payment for insurance: ";
+
+	cin >> insurance;
+
+	cout << "Enter the total maintenance payment: ";
+
+	cin >> maintenance;
+
+	cout << "Enter the monthly payment for tires: ";
+
+	cin >> tires;
+	double total = Loan_payment + gas + oil + insurance + maintenance + tires;
+	double anual = total * 12;
+	cout << "you total monthly cost is " << total << " and your anual cost is " << anual;
+	return 0;
+}
