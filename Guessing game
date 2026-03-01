@@ -1,0 +1,45 @@
+#include <iostream>
+using namespace std;
+
+int main()
+{
+	// Get a different random number each time the program runs
+	srand(time(0));
+
+	// Generate a random number between 0 and 100
+	int randomNum = rand() % 101;
+
+	int x;
+
+//tells the user to enter a number
+	cout << "This game is called number guessing. try to guess a number between 1 and 100 eenter number to get started: ";
+//inputs the number you picked
+	cin >> x;
+	while (x != randomNum) {
+
+		//if x = the random number it reveals answer and cangrats you
+		if (x == randomNum) {
+			cout << "congrats ";
+		}
+
+		//if x is smaller then the random number it tells you to go higher
+		if (x < randomNum) {
+			cout << "go Higher. ";
+		}
+		//if x is bigger then the random number it tells you to go lower
+		if (x > randomNum) {
+			cout << "go lower. ";
+		}
+
+		while (!(cin >> x)) {  // Keep asking until the user enters a valid number
+			cout << "Invalid input. type a number: ";
+			cin.clear(); // Reset input errors
+			cin.ignore(10000, '\n'); // Remove bad input
+		}
+
+	}
+	cout << " congrats, Your number is: " << randomNum;
+
+
+	return 0;
+}
