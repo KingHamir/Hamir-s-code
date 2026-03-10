@@ -1,0 +1,20 @@
+#include <iostream>
+using namespace std;
+
+
+int TDF, WMPH, DP;
+
+int main()
+{
+	cout << "what is the temperature in degrees Fahrenheit" << endl;
+
+	cin >> TDF; // type in the temperature in degrees Fahrenheit
+
+	cout << "what is the windspeed in mph" << endl;
+
+	cin >> WMPH; // type in the windspeed in mph
+	
+	cout << "what is the dew point" << endl;
+	
+	cin >> DP; //type in the dew point
+}
