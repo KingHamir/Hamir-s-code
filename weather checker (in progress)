@@ -4,37 +4,34 @@ using namespace std;
 
 int TDF, WMPH, DP;
 
+void input ( double & TDF, double & WMPH, double & DP);
+
 int main()
 {
-	int number;
+	double TDF;
+
+	cout << "what is the temperature in degrees Fahrenheit" << endl;
+
+	while (!(cin >> TDF)) {  // Keep asking until the user enters a valid number
 		cout << "what is the temperature in degrees Fahrenheit" << endl;
-
-	cin >> TDF; // type in the temperature in degrees Fahrenheit
-
-	cout << "what is the windspeed in mph" << endl;
-
-	cin >> WMPH; // type in the windspeed in mph
-
-	cout << "what is the dew point" << endl;
-
-	cin >> DP; //type in the dew point
-	
-	while (!(cin >> number)) {  // Keep asking until the user enters a valid number
-		cout << "Invalid input. Try again: ";
 		cin.clear(); // Reset input errors
 		cin.ignore(10000, '\n'); // Remove bad input
 	}
-	cout << "You entered: " << number;
 
-//_____________________________________________________________________
-//	cout << "what is the temperature in degrees Fahrenheit" << endl;
+	cout << "what is the windspeed in mph" << endl;
 
-//	cin >> TDF; // type in the temperature in degrees Fahrenheit
+	while (!(cin >> WMPH)) {  // Keep asking until the user enters a valid number
+		cout << "what is the windspeed in mph" << endl;
+		cin.clear(); // Reset input errors
+		cin.ignore(10000, '\n'); // Remove bad input
+	}
 
-//	cout << "what is the windspeed in mph" << endl;
+	cout << "what is the dew point" << endl;
 
-	//cin >> WMPH; // type in the windspeed in mph
+	while (!(cin >> DP)) {  // Keep asking until the user enters a valid number
+		cout << "what is the dew point" << endl;
+		cin.clear(); // Reset input errors
+		cin.ignore(10000, '\n'); // Remove bad input
+	}
 
-	//cout << "what is the dew point" << endl;
-
-	//cin >> DP; //type in the dew point
+}
