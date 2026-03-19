@@ -2,46 +2,59 @@
 using namespace std;
 #include <cmath>
 
-int TDF, WMPH, DP, WC, CBH;
 
-void input ( double & TDF, double & WMPH, double & DP);
 
-void myFunction() {
-while (!(cin >> TDF, WMPH, DP)) {  // Keep asking until the user enters a valid number
+void myFunction4(double& temp_Degrees_Fahrenheit_, double& wind_Miles_Per_Hour, double& dew_Point_);
+void input1(double& temp_Degrees_Fahrenheit_, double& wind_Miles_Per_Hour, double& dew_Point_, double& myFunction1, double& myFunction2, double& myFunction3);
+
+
+int main()
+{
+double temp_Degrees_Fahrenheit_, wind_Miles_Per_Hour, dew_Point_, wind_Chill, cloud_Base_Height,myFunction1,myFunction2,myFunction3;
+
+input1 (temp_Degrees_Fahrenheit_, wind_Miles_Per_Hour, dew_Point_,  myFunction1, myFunction2, myFunction3);
+
+
+
+wind_Chill = 35.74 +
+                0.6215 * temp_Degrees_Fahrenheit_ -
+                35.75 * pow(wind_Miles_Per_Hour, 0.16) +
+                0.4275 * temp_Degrees_Fahrenheit_ * pow(wind_Miles_Per_Hour, 0.16);
+
+cout << "wind chill is " << wind_Chill << endl;
+
+int Cloud_Base_Height = 1000 *
+                       temp_Degrees_Fahrenheit_ -
+                       dew_Point_/4.4;
+
+cout << "Cloud Base Hieght is " << cloud_Base_Height << endl;
+
+myFunction4 (temp_Degrees_Fahrenheit_, wind_Miles_Per_Hour, dew_Point_);
+
+return 0;
+}
+
+
+
+void myFunction4(double& temp_Degrees_Fahrenheit_, double&  wind_Miles_Per_Hour, double& dew_Point_) {
+while (!(cin >> temp_Degrees_Fahrenheit_, wind_Miles_Per_Hour, dew_Point_))   // Keep asking until the user enters a valid number
 cout << "retry" << endl;
 cin.clear(); // Reset input errors
 cin.ignore(10000, '\n'); // Remove bad input
 }
-}
 
-int main()
+void input1(double& temp_Degrees_Fahrenheit_, double& wind_Miles_Per_Hour, double& dew_Point_, double& myFunction1, double& myFunction2, double& myFunction3)
 {
-double TDF;
 
 cout << "what is the temperature in degrees Fahrenheit" << endl;
 
-myFunction();
+cin >> myFunction1;
 
 cout << "what is the windspeed in mph" << endl;
 
-myFunction();
+cin >> myFunction2;
 
 cout << "what is the dew point" << endl;
 
-myFunction();
-
-double WC = 35.74 +
-           0.6215 * TDF -
-           35.75 * pow(WMPH, 0.16) +
-           0.4275 * TDF * pow(WMPH, 0.16);
-
-cout << "wind chill is " << WC << endl;
-
-double CBH = 1000 *
-            TDF -
-            DP/4.4;
-
-cout << "Cloud Base Hieght is " << CBH << endl;
-
-return 0;
+cin >> myFunction3;  
 }
