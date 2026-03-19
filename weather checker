@@ -2,49 +2,46 @@
 using namespace std;
 #include <cmath>
 
-int TDF, WMPH, DP, WC;
+int TDF, WMPH, DP, WC, CBH;
 
-void input ( double & TDF, double & WMPH, double & DP, double & WC, double & CBH);
+void input ( double & TDF, double & WMPH, double & DP);
+
+void myFunction() {
+while (!(cin >> TDF, WMPH, DP)) {  // Keep asking until the user enters a valid number
+cout << "retry" << endl;
+cin.clear(); // Reset input errors
+cin.ignore(10000, '\n'); // Remove bad input
+}
+}
 
 int main()
 {
-	double TDF;
+double TDF;
 
-	cout << "what is the temperature in degrees Fahrenheit" << endl;
+cout << "what is the temperature in degrees Fahrenheit" << endl;
 
-	while (!(cin >> TDF)) {  // Keep asking until the user enters a valid number
-		cout << "what is the temperature in degrees Fahrenheit" << endl;
-		cin.clear(); // Reset input errors
-		cin.ignore(10000, '\n'); // Remove bad input
-	}
+myFunction();
 
-	cout << "what is the windspeed in mph" << endl;
+cout << "what is the windspeed in mph" << endl;
 
-	while (!(cin >> WMPH)) {  // Keep asking until the user enters a valid number
-		cout << "what is the windspeed in mph" << endl;
-		cin.clear(); // Reset input errors
-		cin.ignore(10000, '\n'); // Remove bad input
-	}
+myFunction();
 
-	cout << "what is the dew point" << endl;
+cout << "what is the dew point" << endl;
 
-	while (!(cin >> DP)) {  // Keep asking until the user enters a valid number
-		cout << "what is the dew point" << endl;
-		cin.clear(); // Reset input errors
-		cin.ignore(10000, '\n'); // Remove bad input
-	}
+myFunction();
 
-	double WC = 35.74 +
-	            0.6215 * TDF -
-	            35.75 * pow(WMPH, 0.16) +
-	            0.4275 * TDF * pow(WMPH, 0.16);
+double WC = 35.74 +
+           0.6215 * TDF -
+           35.75 * pow(WMPH, 0.16) +
+           0.4275 * TDF * pow(WMPH, 0.16);
 
-	cout << "wind chill is " << WC << endl;
-	
-	double CBH = 1000 *
-	TDF -
-	DP/4.4;
-	
-	cout << "Cloud Base Hieght is " << CBH << endl;
-	
+cout << "wind chill is " << WC << endl;
+
+double CBH = 1000 *
+            TDF -
+            DP/4.4;
+
+cout << "Cloud Base Hieght is " << CBH << endl;
+
+return 0;
 }
