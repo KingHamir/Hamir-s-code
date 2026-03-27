@@ -55,7 +55,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYC |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "0% chance of colorblindness\n";
+cout << "0% chance of colorblindness for the son and daughter\n";
 }
 
 else if(father == 1 && mother == 2) {
@@ -70,7 +70,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXc  |    XYC |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "50% chance of colorblindness from female\n";
+cout << "50% chance of colorblindness for the son and daughter\n";
 }
 
 else if(father == 2 && mother == 1) {
@@ -85,7 +85,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "50% chance of colorblindness from male\n";
+cout << "50% chance of colorblindness for the son\n";
 }
 
 else if(father == 1 && mother == 3) {
@@ -93,14 +93,14 @@ else if(father == 1 && mother == 3) {
 cout <<  "___________________" << endl;
 cout << "|         |        |" << endl;
 cout << "|         |        |" << endl;
-cout << "|    XXc  |    XYC |" << endl;
+cout << "|    XXc  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
 cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYC |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "25% chance of colorblidness from carrier\n";
+cout << "50% chance of colorblindness for the sons and 50% colorblindness carrier for the daughter\n";
 }
 
 else if(father == 2 && mother == 2) {
@@ -115,7 +115,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXc  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "100% chance of color blindness from mother and father\n";
+cout << "100% chance of color blindness for son and daughter\n";
 }
 
 
@@ -132,7 +132,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "75% chance or colorblindness from carrier and father\n";
+cout << "50% chance or colorblindness for son and 50/50% chance  or colorblindness or carrier for daughter\n";
 }
 
 cout << "do you want to retry 1 for yes, 2 for no\n";
@@ -140,7 +140,7 @@ cin >> number_answer;
 
     while(number_answer == 1) {
        
-        cout << "is the father colorblind 1 for no, 2 for yes\n";
+       cout << "is the father colorblind 1 for no, 2 for yes\n";
 
 cin >> father;
 
@@ -160,7 +160,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYC |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "0% chance of colorblindness\n";
+cout << "0% chance of colorblindness for the son and daughter\n";
 }
 
 else if(father == 1 && mother == 2) {
@@ -175,7 +175,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXc  |    XYC |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "50% chance of colorblindness from female\n";
+cout << "50% chance of colorblindness for the son and daughter\n";
 }
 
 else if(father == 2 && mother == 1) {
@@ -190,7 +190,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "50% chance of colorblindness from male\n";
+cout << "50% chance of colorblindness for the son\n";
 }
 
 else if(father == 1 && mother == 3) {
@@ -198,14 +198,14 @@ else if(father == 1 && mother == 3) {
 cout <<  "___________________" << endl;
 cout << "|         |        |" << endl;
 cout << "|         |        |" << endl;
-cout << "|    XXc  |    XYC |" << endl;
+cout << "|    XXc  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
 cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYC |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "25% chance of colorblidness from carrier\n";
+cout << "50% chance of colorblindness for the sons and 50% colorblindness carrier for the daughter\n";
 }
 
 else if(father == 2 && mother == 2) {
@@ -220,7 +220,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXc  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "100% chance of color blindness from mother and father\n";
+cout << "100% chance of color blindness for son and daughter\n";
 }
 
 
@@ -237,7 +237,7 @@ cout << "|         |        |" << endl;
 cout << "|    XXC  |    XYc |" << endl;
 cout << "|         |        |" << endl;
 cout << "|_________|________|" << endl;
-cout << "75% chance or colorblindness from carrier and father\n";
+cout << "50% chance or colorblindness for son and 50/50% chance  or colorblindness or carrier for daughter\n";
 }
 
 cout << "do you want to retry 1 for yes, 2 for no\n";
