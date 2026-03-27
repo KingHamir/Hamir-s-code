@@ -138,4 +138,111 @@ cout << "75% chance or colorblindness from carrier and father\n";
 cout << "do you want to retry 1 for yes, 2 for no\n";
 cin >> number_answer;
 
+    while(number_answer == 1) {
+       
+        cout << "is the father colorblind 1 for no, 2 for yes\n";
+
+cin >> father;
+
+cout << "is the mother colorblind or a carrier of the gene\n1 for no she is not colorblind\n2 for yes she is color blind\n3 for she is a carrier\n";
+
+cin >> mother;
+
+if(father == 1 && mother == 1) {
+// show the square with no color blindness probability
+cout <<  "___________________" << endl;
+cout << "|         |        |" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXC  |    XYC |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXC  |    XYC |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "0% chance of colorblindness\n";
+}
+
+else if(father == 1 && mother == 2) {
+// show the square with female color blindness probability
+cout <<  "___________________" << endl;
+cout << "|         |        |" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXc  |    XYC |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXc  |    XYC |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "50% chance of colorblindness from female\n";
+}
+
+else if(father == 2 && mother == 1) {
+// show the square with male color blindness probability
+cout <<  "___________________" << endl;
+cout << "|         |        |" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXC  |    XYc |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXC  |    XYc |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "50% chance of colorblindness from male\n";
+}
+
+else if(father == 1 && mother == 3) {
+// show the square with carrier color blindness probability
+cout <<  "___________________" << endl;
+cout << "|         |        |" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXc  |    XYC |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXC  |    XYC |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "25% chance of colorblidness from carrier\n";
+}
+
+else if(father == 2 && mother == 2) {
+// show the square with male and female color blindness probability
+cout <<  "___________________" << endl;
+cout << "|         |        |" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXc  |    XYc |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXc  |    XYc |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "100% chance of color blindness from mother and father\n";
+}
+
+
+
+else if(father == 2 && mother == 3) {
+// show the square with colorblind male and carrier female color blindness probability
+cout <<  "___________________" << endl;
+cout << "|         |        |" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXc  |    XYc |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "|         |        |" << endl;
+cout << "|    XXC  |    XYc |" << endl;
+cout << "|         |        |" << endl;
+cout << "|_________|________|" << endl;
+cout << "75% chance or colorblindness from carrier and father\n";
+}
+
+cout << "do you want to retry 1 for yes, 2 for no\n";
+cin >> number_answer;
+       
+    }
+
 }
