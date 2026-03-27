@@ -2,10 +2,8 @@
 using namespace std;
 
 
-void k(); //Hides the square until k() is called and tells the program to expect k
+void genetics(); //Hides the square until k() is called and tells the program to expect k
 void intro(double& answer);//Hides the beginning message until intro(answer) is called and tells the program to expect intro
-void female(double& norm_female, double& carr_female, double& color_female);//Hides the female gene until female(norm_female, carr_female, color female) is called and tells the program to expect female(norm_female, carr_female, color female)
-void male(double& norm_male, double& color_male);//Hides the male gene until male(double& norm_male, double& color_male) is called and tells the program to expect male(double& norm_male, double& color_male)
 int mother, father;
 int number_answer;
 
@@ -28,14 +26,14 @@ void intro(double& answer) { //explains what void intro does and what to do
 cout << "press on 1 if you are ready or press 0 to cancel\n"; //shows the message "press on 1 if you are ready or press 0 to cancel"
 cin >> answer; //lets the user type in there answer
 if (answer == 1) {
-k(); // if answer = 1 inputs k and starts program
+genetics(); // if answer = 1 inputs genetics and starts program
 }
 }
 
 //genotypes are gene changes and phenotypes are physical changes
 
 
-void k() { //waits to be called to show the square
+void genetics() { //waits to be called to show the square
 
 cout << "is the father colorblind 1 for no, 2 for yes\n";
 
