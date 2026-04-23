@@ -1,0 +1,1072 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <string>
+#include <limits>
+
+using namespace std;
+
+// ======= FUNCTION DECLARATIONS =======
+
+// These are declared before main to allow functions to call each other
+
+// Gets a single digit input from user, returns -1 if invalid
+int getSingleCharInput();
+
+// Global variables for game state
+int player_count; // Total number of players
+int instruction_answer; // User's menu choice
+int game_mode; // 1 = single player, 2 = multiplayer
+string playerNames[8]; // Array storing names of up to 8 players
+int humanPlayer = 0; // Index of human player (always 0 in single player)
+
+// Deck representation
+int deckValues[52]; // Values of all 52 cards (2-14, where 11=J,12=Q,13=K,14=A)
+char deckSuits[52]; // Suits of all cards (S=Spades, D=Diamonds, C=Clubs, H=Hearts)
+int deckSize; // Current number of cards in deck
+
+// Player hand representation
+int playerHandValues[8][6]; // Card values for each player's hand (max 6 cards each)
+char playerHandSuits[8][6]; // Card suits for each player's hand
+int playerHandSize[8]; // Number of cards currently held by each player
+
+// Player statistics
+int playerScores[8]; // Total penalty points for each player
+int playerEliminated[8]; // 1 if player is eliminated (cucumber), 0 if active
+int currentDealer = 0; // Index of current round's dealer
+
+// ========== FUNCTION PROTOTYPES ==========
+void game();
+void instructions();
+void printCard(int value, char suit);
+void printAllCards();
+void dealCards();
+void playRound();
+string getCardName(int value);
+string getCardSymbol(int value);
+string getSuitSymbol(char suit);
+void showPlayerHand(int player);
+int findLowestCardIndex(int player);
+void checkEliminations();
+int countActivePlayers();
+void showScores();
+void removeCardFromHand(int player, int cardIndex);
+void displayRules();
+void displayGoodbye();
+void setupSinglePlayer();
+void setupMultiplayer();
+int getAICardChoice(int player, int highestValue);
+bool isValidMove(int player, int cardIndex, int highestValue);
+
+// ========== MAIN FUNCTION ==========
+int main() {
+srand(time(0)); // Seed random number generator with current time
+
+// Main game loop - continuously show instructions menu
+while (1) instructions();
+
+return 0;
+}
+
+// ========== UTILITY FUNCTIONS ==========
+
+/**
+* Displays goodbye message when game ends
+*/
+void displayGoodbye() {
+cout << "\n========================================\n";
+cout << "== THANKS FOR PLAYING GURKA! ==\n";
+cout << "========================================\n\n";
+}
+
+/**
+* Main menu function - displays options and handles user input
+*/
+void instructions() {
+cout << "\n========================================\n";
+cout << " GURKA Card Game\n";
+cout << "========================================\n\n";
+cout << "Please select an option:\n\n";
+cout << " 1 - View the game instructions\n";
+cout << " 2 - Single Player (vs AI)\n";
+cout << " 3 - Multiplayer (3-8 players)\n";
+cout << " 4 - View all cards in the deck\n";
+cout << " 0 - Quit the program\n\n";
+cout << "Your choice: ";
+instruction_answer = getSingleCharInput();
+
+// Process user's menu choice
+if(instruction_answer == 1) displayRules();
+else if(instruction_answer == 2) { game_mode = 1; game(); }
+else if(instruction_answer == 3) { game_mode = 2; game(); }
+else if(instruction_answer == 4) printAllCards();
+else if(instruction_answer == 0) { displayGoodbye(); exit(0); }
+else cout << "\nInvalid choice. Please try again.\n";
+}
+
+/**
+* Displays the complete game rules
+*/
+void displayRules() {
+cout << "\n========================================\n";
+cout << " GAME RULES\n";
+cout << "========================================\n\n";
+cout << "The goal is to avoid getting penalty points.\n";
+cout << "If you reach 30 points, you become a CUCUMBER and you're out!\n\n";
+cout << "CARD RANKING: Ace(14) > King(13) > Queen(12) > Jack(11) > 10-2\n\n";
+cout << "HOW TO PLAY:\n";
+cout << "- First player can play any card\n";
+cout << "- Others must play a card >= highest card OR play their lowest card\n";
+cout << "- Highest card wins the trick\n";
+cout << "- Winner leads the next trick\n\n";
+cout << "SCORING:\n";
+cout << "- Trick winner gets NO penalty points\n";
+cout << "- All others get penalty points equal to their card's value\n";
+cout << "========================================\n\n";
+}
+
+/**
+* Sets up single player mode with human vs AI opponents
+*/
+void setupSinglePlayer() {
+cout << "\n========================================\n";
+cout << " SINGLE PLAYER MODE\n";
+cout << "========================================\n\n";
+
+int botCount;
+cout << "How many AI opponents? (2-7): ";
+botCount = getSingleCharInput();
+
+// Validate bot count input
+if(botCount < 2 || botCount == -1) botCount = 2;
+if(botCount > 7) botCount = 7;
+
+player_count = botCount + 1; // +1 for human player
+humanPlayer = 0; // Human is always player 0
+
+// Get human player's name
+cout << "\nEnter your name: ";
+getline(cin, playerNames[0]);
+if(playerNames[0].empty()) playerNames[0] = "Player";
+
+// Assign AI names
+string botNames[7] = {"Bot Alpha", "Bot Beta", "Bot Gamma", "Bot Delta", "Bot Elsa", "Bot Zeta", "Bot Eta"};
+for(int i = 1; i < player_count; i++) playerNames[i] = botNames[i - 1];
+
+cout << "\nYou are playing against " << botCount << " AI opponents!\n";
+}
+
+
+//multiplayer mode
+void setupMultiplayer() {
+cout << "\n========================================\n";
+cout << " MULTIPLAYER MODE\n";
+cout << "========================================\n\n";
+
+cout << "How many players? (3-8): ";
+player_count = getSingleCharInput();
+
+// Validate player count
+if(player_count < 3 || player_count == -1) player_count = 3;
+if(player_count > 8) player_count = 8;
+
+// Get names for all players
+cout << "\nEnter names for each player:\n\n";
+for(int i = 0; i < player_count; i++) {
+cout << "Player " << (i + 1) << " name: ";
+getline(cin, playerNames[i]);
+if(playerNames[i].empty()) playerNames[i] = "Player " + to_string(i + 1);
+}
+}
+
+//make sure the cards play is valid
+bool isValidMove(int player, int cardIndex, int highestValue) {
+int cardVal = playerHandValues[player][cardIndex];
+int lowestIdx = findLowestCardIndex(player);
+
+// Leading player can play any card
+if(highestValue == 0) return true;
+
+// Can play card if it's >= highest card
+if(cardVal >= highestValue) return true;
+
+// Can play lowest card as a special case
+if(cardIndex == lowestIdx) return true;
+
+return false;
+}
+
+//bots
+int getAICardChoice(int player, int highestValue) {
+int validMoves[6]; // Store indices of valid cards
+int validCount = 0;
+
+// Find all valid cards
+for(int i = 0; i < playerHandSize[player]; i++) {
+if(isValidMove(player, i, highestValue)) {
+validMoves[validCount] = i;
+validCount++;
+}
+}
+
+// Return first valid card (or 0 if none found)
+if(validCount == 0) return 0;
+return validMoves[rand() % validCount];
+}
+
+//number to letters
+string getCardSymbol(int value) {
+if(value == 11) return "J";
+if(value == 12) return "Q";
+if(value == 13) return "K";
+if(value == 14) return "A";
+return to_string(value);
+}
+
+//suit symbols
+string getSuitSymbol(char suit) {
+if(suit == 'S') return "S";
+if(suit == 'D') return "D";
+if(suit == 'C') return "C";
+if(suit == 'H') return "H";
+return "?";
+}
+
+//Prints card
+
+void printCard(int value, char suit) {
+if(value == 2 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   2   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   2   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 2 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   2   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   2   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 2 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   2   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   2   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 2 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   2   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   2   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 3 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   3   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   3   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 3 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   3   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   3   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 3 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   3   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   3   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 3 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   3   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   3   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 4 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   4   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   4   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 4 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   4   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   4   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 4 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   4   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   4   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 4 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   4   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   4   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 5 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   5   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   5   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 5 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   5   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   5   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 5 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   5   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   5   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 5 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   5   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   5   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 6 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   6   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   6   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 6 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   6   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   6   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 6 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   6   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   6   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 6 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   6   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   6   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 7 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   7   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   7   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 7 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   7   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   7   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 7 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   7   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   7   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 7 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   7   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   7   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 8 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   8   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   8   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 8 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   8   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   8   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 8 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   8   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   8   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 8 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   8   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   8   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 9 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|   9   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   9   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 9 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|   9   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   9   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 9 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|   9   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   9   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 9 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|   9   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   9   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 10 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|  10   |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   10  |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 10 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|  10   |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   10  |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 10 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|  10   |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   10  |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 10 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|  10   |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   10  |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 11 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|  J    |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   J   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 11 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|  J    |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   J   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 11 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|  J    |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   J   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 11 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|  J    |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   J   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 12 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|  Q    |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   Q   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 12 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|  Q    |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   Q   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 12 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|  Q    |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   Q   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 12 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|  Q    |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   Q   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 13 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|  K    |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   K   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 13 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|  K    |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   K   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 13 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|  K    |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   K   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 13 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|  K    |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   K   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 14 && suit == 'S') {
+cout << ".-------." << endl;
+cout << "|  A    |" << endl;
+cout << "|       |" << endl;
+cout << "|   S   |" << endl;
+cout << "|       |" << endl;
+cout << "|   A   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 14 && suit == 'D') {
+cout << ".-------." << endl;
+cout << "|  A    |" << endl;
+cout << "|       |" << endl;
+cout << "|   D   |" << endl;
+cout << "|       |" << endl;
+cout << "|   A   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 14 && suit == 'C') {
+cout << ".-------." << endl;
+cout << "|  A    |" << endl;
+cout << "|       |" << endl;
+cout << "|   C   |" << endl;
+cout << "|       |" << endl;
+cout << "|   A   |" << endl;
+cout << "'-------'" << endl;
+}
+else if(value == 14 && suit == 'H') {
+cout << ".-------." << endl;
+cout << "|  A    |" << endl;
+cout << "|       |" << endl;
+cout << "|   H   |" << endl;
+cout << "|       |" << endl;
+cout << "|   A   |" << endl;
+cout << "'-------'" << endl;
+}
+}
+
+/**
+* Displays all cards in a player's hand
+* @param player - Player index
+*/
+void showPlayerHand(int player) {
+cout << "\nYour cards:\n\n";
+for(int i = 0; i < playerHandSize[player]; i++) {
+cout << "Card " << (i + 1) << ":\n";
+printCard(playerHandValues[player][i], playerHandSuits[player][i]);
+cout << "\n";
+}
+}
+
+// ========== MAIN GAME FUNCTIONS ==========
+
+/**
+* Main game controller - manages game flow and rounds
+*/
+void game() {
+// Setup based on game mode
+if(game_mode == 1) setupSinglePlayer();
+else setupMultiplayer();
+
+// Initialize game state
+for(int i = 0; i < 8; i++) {
+playerScores[i] = 0;
+playerEliminated[i] = 0;
+playerHandSize[i] = 0;
+}
+currentDealer = 0;
+
+cout << "\n========================================\n";
+cout << " Game started with " << player_count << " players!\n";
+cout << "========================================\n\n";
+
+// Continue game until only one player remains
+while(countActivePlayers() > 1) {
+cout << "\n\n========================================\n";
+cout << " NEW ROUND - Dealer: " << playerNames[currentDealer] << "\n";
+cout << "========================================\n";
+
+showScores(); // Display current scores
+dealCards(); // Deal cards for this round
+playRound(); // Play all tricks in this round
+checkEliminations(); // Check for players who reached 30 points
+
+// Move to next dealer, skip eliminated players
+currentDealer = (currentDealer + 1) % player_count;
+while(playerEliminated[currentDealer] == 1 && countActivePlayers() > 1) {
+currentDealer = (currentDealer + 1) % player_count;
+}
+
+cout << "\nPress Enter to continue...";
+cin.get();
+}
+
+// Announce winner
+for(int i = 0; i < player_count; i++) {
+if(playerEliminated[i] == 0) {
+cout << "\n\n========================================\n";
+cout << "== GAME OVER! ==\n";
+cout << "== " << playerNames[i] << " WINS THE GAME! ==\n";
+cout << "========================================\n\n";
+break;
+}
+}
+}
+
+/**
+* Deals 6 cards to each active player from shuffled deck
+*/
+void dealCards() {
+deckSize = 0;
+for(int i = 0; i < 8; i++) playerHandSize[i] = 0;
+
+// Create standard 52-card deck
+char suits[4] = {'S', 'D', 'C', 'H'};
+for(int s = 0; s < 4; s++) {
+for(int v = 2; v <= 14; v++) {
+deckValues[deckSize] = v;
+deckSuits[deckSize] = suits[s];
+deckSize++;
+}
+}
+
+// Fisher-Yates shuffle algorithm
+for(int i = deckSize - 1; i > 0; i--) {
+int j = rand() % (i + 1);
+swap(deckValues[i], deckValues[j]);
+swap(deckSuits[i], deckSuits[j]);
+}
+
+// Deal cards to active players (6 cards each)
+int deckIndex = 0;
+for(int cardNum = 0; cardNum < 6; cardNum++) {
+for(int p = 0; p < player_count; p++) {
+if(playerEliminated[p] == 0) {
+playerHandValues[p][playerHandSize[p]] = deckValues[deckIndex];
+playerHandSuits[p][playerHandSize[p]] = deckSuits[deckIndex];
+playerHandSize[p]++;
+deckIndex++;
+}
+}
+}
+
+cout << "\nCards have been dealt! Each player has 6 cards.\n";
+}
+
+/**
+* Plays all tricks in a round
+* Each trick: players play cards, highest card wins, winner leads next trick
+*/
+void playRound() {
+// Determine who starts (player after dealer)
+int startPlayer = (currentDealer + 1) % player_count;
+while(playerEliminated[startPlayer] == 1) startPlayer = (startPlayer + 1) % player_count;
+
+int trickNum = 0;
+int playerRoundPoints[8] = {0}; // Track points earned this round
+
+// Continue until all cards are played
+while(1) {
+// Check if any active players have cards left
+int handsEmpty = 1;
+for(int p = 0; p < player_count; p++) {
+if(playerEliminated[p] == 0 && playerHandSize[p] > 0) {
+handsEmpty = 0;
+break;
+}
+}
+if(handsEmpty == 1) break;
+
+trickNum++;
+cout << "\n\n----------------------------------------\n";
+cout << " TRICK " << trickNum << "\n";
+cout << "----------------------------------------\n";
+
+// Arrays to track the current trick
+int trickPlayers[8], trickValues[8];
+char trickSuits[8];
+int trickSize = 0;
+int highestValue = 0;
+int currentPlayer = startPlayer;
+int trickWinner = startPlayer;
+int activePlayers = countActivePlayers();
+
+// Each player plays one card
+for(int turn = 0; turn < activePlayers; turn++) {
+// Skip eliminated players and those with no cards
+while(playerEliminated[currentPlayer] == 1) currentPlayer = (currentPlayer + 1) % player_count;
+if(playerHandSize[currentPlayer] == 0) {
+currentPlayer = (currentPlayer + 1) % player_count;
+continue;
+}
+
+cout << "\n" << playerNames[currentPlayer] << "'s turn";
+if(game_mode == 1 && currentPlayer == humanPlayer) cout << " (YOU)";
+cout << "\n----------------------------------------\n";
+
+// Show highest card to beat
+if(highestValue == 0) cout << "Highest card to beat: None (leading)\n";
+else cout << "Highest card to beat: " << getCardName(highestValue) << "\n";
+
+int cardIndex = -1;
+bool isAI = (game_mode == 1 && currentPlayer != humanPlayer);
+
+// AI or Human move
+if(isAI) {
+cardIndex = getAICardChoice(currentPlayer, highestValue);
+cout << "\n" << playerNames[currentPlayer] << " is thinking...\n";
+} else {
+showPlayerHand(currentPlayer);
+// Keep asking until valid move is chosen
+while(1) {
+cout << "\nChoose a card to play (1-" << playerHandSize[currentPlayer] << "): ";
+cardIndex = getSingleCharInput() - 1;
+if(cardIndex < 0 || cardIndex >= playerHandSize[currentPlayer]) {
+cout << "\nInvalid choice!\n";
+continue;
+}
+if(isValidMove(currentPlayer, cardIndex, highestValue)) break;
+
+int lowestIdx = findLowestCardIndex(currentPlayer);
+cout << "\nINVALID MOVE! Must play card >= " << getCardName(highestValue);
+cout << " OR play lowest card (" << getCardName(playerHandValues[currentPlayer][lowestIdx]) << ")\n";
+}
+}
+
+// Play the selected card
+int playedValue = playerHandValues[currentPlayer][cardIndex];
+char playedSuit = playerHandSuits[currentPlayer][cardIndex];
+removeCardFromHand(currentPlayer, cardIndex);
+
+cout << "\n>>> " << playerNames[currentPlayer] << " plays:\n";
+printCard(playedValue, playedSuit);
+
+// Record the played card
+trickPlayers[trickSize] = currentPlayer;
+trickValues[trickSize] = playedValue;
+trickSuits[trickSize] = playedSuit;
+trickSize++;
+
+// Update highest card and potential winner
+if(playedValue >= highestValue) {
+highestValue = playedValue;
+trickWinner = currentPlayer;
+}
+
+currentPlayer = (currentPlayer + 1) % player_count;
+}
+
+// Announce trick winner
+cout << "\n========================================\n";
+cout << playerNames[trickWinner] << " wins trick " << trickNum << "!\n";
+cout << "========================================\n";
+
+// Award penalty points to all non-winners
+for(int i = 0; i < trickSize; i++) {
+int p = trickPlayers[i];
+if(p != trickWinner) {
+int pts = trickValues[i];
+playerScores[p] += pts;
+playerRoundPoints[p] += pts;
+}
+}
+
+// Winner leads next trick
+startPlayer = trickWinner;
+}
+
+// Display round summary
+cout << "\n========================================\n";
+cout << " ROUND SUMMARY\n";
+cout << "========================================\n\n";
+for(int p = 0; p < player_count; p++) {
+if(playerEliminated[p] == 1) continue;
+cout << " " << playerNames[p] << ": +" << playerRoundPoints[p] << " this round, Total: " << playerScores[p];
+if(playerScores[p] >= 30) cout << " <-- CUCUMBER!";
+cout << "\n";
+}
+cout << "========================================\n\n";
+}
+
+/**
+* Removes a card from a player's hand by shifting remaining cards left
+* @param player - Player index
+* @param cardIndex - Index of card to remove
+*/
+void removeCardFromHand(int player, int cardIndex) {
+for(int i = cardIndex; i < playerHandSize[player] - 1; i++) {
+playerHandValues[player][i] = playerHandValues[player][i + 1];
+playerHandSuits[player][i] = playerHandSuits[player][i + 1];
+}
+playerHandSize[player]--;
+}
+
+/**
+* Finds the index of the lowest value card in a player's hand
+* @param player - Player index
+* @return Index of lowest card
+*/
+int findLowestCardIndex(int player) {
+int lowestIdx = 0;
+int lowestVal = playerHandValues[player][0];
+for(int i = 1; i < playerHandSize[player]; i++) {
+if(playerHandValues[player][i] < lowestVal) {
+lowestVal = playerHandValues[player][i];
+lowestIdx = i;
+}
+}
+return lowestIdx;
+}
+
+/**
+* Converts card value to readable name
+* @param value - Card value (2-14)
+* @return String name (Ace, King, Queen, Jack, or number)
+*/
+string getCardName(int value) {
+if(value == 11) return "Jack";
+if(value == 12) return "Queen";
+if(value == 13) return "King";
+if(value == 14) return "Ace";
+return to_string(value);
+}
+
+/**
+* Checks and eliminates players who have reached 30 or more points
+* Eliminated players become "cucumbers" and are out of the game
+*/
+void checkEliminations() {
+for(int p = 0; p < player_count; p++) {
+if(playerEliminated[p] == 0 && playerScores[p] >= 30) {
+cout << "\n========================================\n";
+cout << playerNames[p] << " has " << playerScores[p] << " points and is a CUCUMBER!\n";
+cout << playerNames[p] << " is ELIMINATED!\n";
+cout << "========================================\n\n";
+playerEliminated[p] = 1;
+}
+}
+}
+
+
+//Counts how many players are still active (not eliminated)
+int countActivePlayers() {
+int count = 0;
+for(int p = 0; p < player_count; p++) {
+if(playerEliminated[p] == 0) count++;
+}
+return count;
+}
+
+/**
+* Displays current scores for all players
+*/
+void showScores() {
+cout << "\n----------------------------------------\n";
+cout << " CURRENT SCORES\n";
+cout << "----------------------------------------\n";
+for(int p = 0; p < player_count; p++) {
+cout << " " << playerNames[p] << ": ";
+if(playerEliminated[p] == 0) {
+cout << playerScores[p] << " points";
+if(playerScores[p] >= 20) cout << " (DANGER!)"; // Warning when close to elimination
+} else {
+cout << "ELIMINATED";
+}
+cout << "\n";
+}
+cout << "----------------------------------------\n\n";
+}
+
+/**
+* Displays all 52 cards in the deck for reference
+* Useful for new players to see card values and suits
+*/
+void printAllCards() {
+cout << "\n========================================\n";
+cout << " ALL CARDS IN DECK\n";
+cout << "========================================\n";
+
+char suits[4] = {'S', 'D', 'C', 'H'};
+string suitNames[4] = {"SPADES", "DIAMONDS", "CLUBS", "HEARTS"};
+
+// Print all cards organized by suit
+for(int s = 0; s < 4; s++) {
+cout << "\n=== " << suitNames[s] << " ===\n\n";
+for(int v = 2; v <= 14; v++) {
+cout << getCardName(v) << ":\n";
+printCard(v, suits[s]);
+cout << "\n";
+}
+}
+cout << "\n";
+}
+
+
+//Gets a single character input from user and converts to integer
+int getSingleCharInput() {
+char c;
+cin >> c;
+cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear input buffer
+if(c >= '0' && c <= '9') return c - '0';
+return -1;
+}
