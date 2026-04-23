@@ -1,0 +1,78 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Total resistance in series
+double totalResistanceSeries(const vector<double>& resistors) {
+double sum = 0;
+for (double r : resistors) sum += r;
+return sum;
+}
+
+// Total resistance in parallel
+double totalResistanceParallel(const vector<double>& resistors) {
+double inverseSum = 0;
+for (double r : resistors) inverseSum += 1.0 / r;
+return 1.0 / inverseSum;
+}
+
+// Voltage drops in series
+vector<double> voltageDropsSeries(const vector<double>& resistors, double supplyVoltage) {
+vector<double> drops;
+double totalR = totalResistanceSeries(resistors);
+
+for (double r : resistors) {
+drops.push_back(supplyVoltage * (r / totalR));
+}
+return drops;
+}
+
+// Currents in parallel
+vector<double> currentsParallel(const vector<double>& resistors, double supplyVoltage) {
+vector<double> currents;
+for (double r : resistors) {
+currents.push_back(supplyVoltage / r);
+}
+return currents;
+}
+
+int main() {
+int n;
+double voltage;
+
+cout << "How many resistors? ";
+cin >> n;
+
+vector<double> resistors(n);
+
+cout << "Enter each resistor value (ohms):\n";
+for (int i = 0; i < n; i++) {
+cout << "R" << i + 1 << ": ";
+cin >> resistors[i];
+}
+
+cout << "Enter source voltage (V): ";
+cin >> voltage;
+
+//series circuit
+cout << "series circuit";
+double R_series = totalResistanceSeries(resistors);
+cout << " Resistance: " << R_series << " ohms\n";
+
+vector<double> drops = voltageDropsSeries(resistors, voltage);
+for (int i = 0; i < n; i++) {
+cout << "Voltage Drop across R" << i + 1 << ": " << drops[i] << " V\n";
+}
+
+// parallel circuit
+cout << "parallel circuit";
+double R_parallel = totalResistanceParallel(resistors);
+cout << " Resistance: " << R_parallel << " ohms\n";
+
+vector<double> currents = currentsParallel(resistors, voltage);
+for (int i = 0; i < n; i++) {
+cout << "Current through R" << i + 1 << ": " << currents[i] << " A\n";
+}
+
+return 0;
+}
