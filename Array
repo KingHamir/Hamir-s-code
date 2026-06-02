@@ -1,0 +1,19 @@
+// 1. Array Allocator (with example usage)
+#include <iostream>
+
+int* allocateArray(int size) {
+return new int[size];
+}
+
+int main() {
+int n;
+std::cout << "Enter array size: ";
+std::cin >> n;
+int* arr = allocateArray(n);
+for (int i = 0; i < n; ++i)
+arr[i] = i + 1;
+for (int i = 0; i < n; ++i)
+std::cout << arr[i] << ' ';
+delete[] arr;
+return 0;
+}
