@@ -1,0 +1,41 @@
+// 2. Test Scores #1
+#include <iostream>
+#include <algorithm> // for std::sort
+
+void sortScores(int* scores, int size) {
+std::sort(scores, scores + size);
+}
+
+double calculateAverage(int* scores, int size) {
+int sum = 0;
+for (int i = 0; i < size; ++i)
+sum += *(scores + i); // pointer notation
+return static_cast<double>(sum) / size;
+}
+
+int main() {
+int numScores;
+std::cout << "Enter number of test scores: ";
+std::cin >> numScores;
+
+int* scores = new int[numScores];
+for (int i = 0; i < numScores; ++i) {
+do {
+std::cout << "Score " << i+1 << ": ";
+std::cin >> *(scores + i);
+if (*(scores + i) < 0)
+std::cout << "Invalid (negative). Try again.\n";
+} while (*(scores + i) < 0);
+}
+
+sortScores(scores, numScores);
+double avg = calculateAverage(scores, numScores);
+
+std::cout << "\nSorted scores:\n";
+for (int i = 0; i < numScores; ++i)
+std::cout << *(scores + i) << ' ';
+std::cout << "\nAverage: " << avg << std::endl;
+
+delete[] scores;
+return 0;
+}
