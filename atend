@@ -1,0 +1,267 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+
+
+using namespace std;
+
+
+struct AttendanceRecord {
+string date;
+vector<string> present;
+};
+
+
+// Simple save - just use current folder
+bool saveAttendance(const vector<AttendanceRecord>& records) {
+// Try a simple filename first
+ofstream outFile("attendance.txt");
+
+
+if (!outFile.is_open()) {
+cout << "Could not save to attendance.txt" << endl;
+return false;
+}
+
+
+// Save number of records
+outFile << records.size() << endl;
+
+
+// Save each record
+for (size_t i = 0; i < records.size(); i++) {
+outFile << records[i].date << endl;
+outFile << records[i].present.size() << endl;
+for (size_t j = 0; j < records[i].present.size(); j++) {
+outFile << records[i].present[j] << endl;
+}
+}
+
+
+outFile.close();
+cout << "Successfully saved " << records.size() << " record(s) to attendance.txt" << endl;
+return true;
+}
+
+
+// Simple load
+bool loadAttendance(vector<AttendanceRecord>& records) {
+ifstream inFile("attendance.txt");
+
+
+if (!inFile.is_open()) {
+cout << "No existing attendance.txt file found. Starting fresh." << endl;
+return false;
+}
+
+
+records.clear();
+int numRecords;
+inFile >> numRecords;
+inFile.ignore();
+
+
+for (int i = 0; i < numRecords; i++) {
+AttendanceRecord record;
+
+
+// Get date
+getline(inFile, record.date);
+
+
+// Get number of people
+int numPeople;
+inFile >> numPeople;
+inFile.ignore();
+
+
+// Get each person's name
+for (int j = 0; j < numPeople; j++) {
+string name;
+getline(inFile, name);
+record.present.push_back(name);
+}
+
+
+records.push_back(record);
+}
+
+
+inFile.close();
+cout << "Loaded " << records.size() << " record(s) from attendance.txt" << endl;
+return true;
+}
+
+
+// Find record by date
+int findRecord(const vector<AttendanceRecord>& records, const string& date) {
+for (size_t i = 0; i < records.size(); i++) {
+if (records[i].date == date) {
+return i;
+}
+}
+return -1;
+}
+
+
+// Show all dates
+void showAllDates(const vector<AttendanceRecord>& records) {
+if (records.empty()) {
+cout << "\nNo dates saved yet." << endl;
+return;
+}
+
+
+cout << "\n=== SAVED DATES ===" << endl;
+for (size_t i = 0; i < records.size(); i++) {
+cout << " " << (i + 1) << ". " << records[i].date
+<< " (" << records[i].present.size() << " people)" << endl;
+}
+cout << "==================" << endl;
+}
+
+
+// Show attendance for a date
+void showAttendance(const AttendanceRecord& record) {
+cout << "\n=== ATTENDANCE FOR " << record.date << " ===" << endl;
+if (record.present.empty()) {
+cout << "No one present." << endl;
+} else {
+for (size_t i = 0; i < record.present.size(); i++) {
+cout << " " << (i + 1) << ". " << record.present[i] << endl;
+}
+}
+cout << "Total: " << record.present.size() << " person(s)" << endl;
+}
+
+
+int main() {
+vector<AttendanceRecord> records;
+
+
+cout << "=== ATTENDANCE TRACKER ===" << endl;
+
+
+// Try to load existing data
+loadAttendance(records);
+
+
+int choice;
+string date, name;
+
+
+do {
+cout << "\n--- MENU ---" << endl;
+cout << "1. Add NEW date" << endl;
+cout << "2. View EXISTING date" << endl;
+cout << "3. Show ALL dates" << endl;
+cout << "4. Add person to date" << endl;
+cout << "5. SAVE and EXIT" << endl;
+cout << "Choice: ";
+cin >> choice;
+cin.ignore();
+
+
+if (choice == 1) {
+// Add new date
+cout << "Enter date (e.g., June 1, 2024): ";
+getline(cin, date);
+
+
+// Check if date already exists
+if (findRecord(records, date) != -1) {
+cout << "This date already exists! Use option 4 to add more people." << endl;
+continue;
+}
+
+
+AttendanceRecord newRecord;
+newRecord.date = date;
+
+
+cout << "Enter names (type 'done' to finish):" << endl;
+while (true) {
+cout << " Name: ";
+getline(cin, name);
+if (name == "done") break;
+if (!name.empty()) {
+newRecord.present.push_back(name);
+}
+}
+
+
+records.push_back(newRecord);
+cout << "Added " << newRecord.present.size() << " person(s) for " << date << endl;
+}
+else if (choice == 2) {
+// View existing date
+if (records.empty()) {
+cout << "No dates saved yet. Use option 1 first." << endl;
+continue;
+}
+
+
+showAllDates(records);
+cout << "Enter number to view (0 to cancel): ";
+int num;
+cin >> num;
+cin.ignore();
+
+
+if (num > 0 && num <= (int)records.size()) {
+showAttendance(records[num - 1]);
+} else if (num != 0) {
+cout << "Invalid number!" << endl;
+}
+}
+else if (choice == 3) {
+// Show all dates
+showAllDates(records);
+}
+else if (choice == 4) {
+// Add person to existing date
+if (records.empty()) {
+cout << "No dates saved yet. Use option 1 first." << endl;
+continue;
+}
+
+
+showAllDates(records);
+cout << "Enter number to add to (0 to cancel): ";
+int num;
+cin >> num;
+cin.ignore();
+
+
+if (num > 0 && num <= (int)records.size()) {
+cout << "Enter name to add: ";
+getline(cin, name);
+records[num - 1].present.push_back(name);
+cout << "Added " << name << " to " << records[num - 1].date << endl;
+} else if (num != 0) {
+cout << "Invalid number!" << endl;
+}
+}
+else if (choice == 5) {
+// Save and exit
+if (saveAttendance(records)) {
+cout << "Data saved! Exiting..." << endl;
+} else {
+cout << "WARNING: Could not save data!" << endl;
+}
+}
+else {
+cout << "Invalid choice. Please enter 1-5." << endl;
+}
+
+
+} while (choice != 5);
+
+
+return 0;
+}
+
+
+
+
